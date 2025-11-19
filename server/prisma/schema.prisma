@@ -6,3 +6,54 @@ datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
+
+model Role {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  users User[]
+}
+
+model User {
+  id           Int     @id @default(autoincrement())
+  name         String
+  email        String  @unique
+  passwordHash String
+  active       Boolean @default(true)
+  rolId        Int
+  role         Role    @relation(fields: [rolId], references: [id])
+  orders Order[]
+}
+
+model Product {
+  id Int @id @default(autoincrement())
+  name String @unique
+  description String?
+  stock Int @default(0)
+  price Float
+  category String?
+  orderDetails OrderDetail[]
+}
+
+model Order {
+  id Int @id @default(autoincrement())
+  type OrderType @default(ENTRY)
+  date DateTime @default(now())
+  userId Int
+  user User @relation(fields: [userId], references: [id])
+  orderDetails OrderDetail[]
+}
+
+model OrderDetail {
+  id Int @id @default(autoincrement())
+  orderId Int
+  productId Int
+  amount Int
+  price Float
+  order Order @relation(fields: [orderId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+}
+
+enum OrderType {
+  ENTRY
+  EXIT
+}
